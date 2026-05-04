@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>TowTrack</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#0c0c0f;--bg2:#13131a;--bg3:#1a1a24;--bg4:#21212e;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#eeedf5;--text2:#8f8ea0;--text3:#4e4d5e;
+  --green:#10d97a;--green-bg:rgba(16,217,122,0.1);--green-b:rgba(16,217,122,0.25);
+  --blue:#4f8ef7;--blue-bg:rgba(79,142,247,0.1);--blue-b:rgba(79,142,247,0.25);
+  --amber:#f5a623;--amber-bg:rgba(245,166,35,0.1);--amber-b:rgba(245,166,35,0.25);
+  --red:#f74f4f;--red-bg:rgba(247,79,79,0.1);--red-b:rgba(247,79,79,0.25);
+  --purple:#9b7ef8;--purple-bg:rgba(155,126,248,0.1);--purple-b:rgba(155,126,248,0.25);
+  --r:14px;--rs:9px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* LOADING */
+#loading{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999}
+.spinner{width:40px;height:40px;border:3px solid var(--border2);border-top-color:var(--blue);border-radius:50%;animation:spin 1s linear infinite;margin-bottom:16px}
+
+/* TOAST */
+#toast{position:fixed;bottom:24px;right:24px;padding:12px 18px;border-radius:10px;font-size:13px;font-weight:500;z-index:9999;display:none;animation:fadeUp .3s ease;max-width:320px;line-height:1.5}
+.toast-green{background:var(--green);color:#000}
+.toast-red{background:var(--red);color:#fff}
+.toast-blue{background:var(--blue);color:#fff}
+
+/* PAGES */
+.page{display:none;min-height:100vh}
+.page.show{display:block}
+
+/* LANDING */
+#pg-landing{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+.landing-box{background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:36px;width:100%;max-width:420px;animation:fadeUp .25s ease}
+.app-logo{text-align:center;margin-bottom:28px}
+.logo-icon{width:64px;height:64px;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:18px;margin:0 auto 14px;display:flex;align-items:center;justify-content:center}
+.logo-icon svg{width:30px;height:30px;stroke:#fff;fill:none;stroke-width:1.6}
+.app-name{font-family:'Syne',sans-serif;font-size:26px;font-weight:700}
+.app-sub{font-size:13px;color:var(--text2);margin-top:4px}
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.role-card{border-radius:var(--r);border:1px solid var(--border);background:var(--bg3);padding:18px;cursor:pointer;transition:all .2s;text-align:center}
+.role-card:hover{border-color:var(--border2);background:var(--bg4);transform:translateY(-2px)}
+.rc-icon{width:44px;height:44px;border-radius:12px;margin:0 auto 10px;display:flex;align-items:center;justify-content:center}
+.rc-icon svg{width:20px;height:20px;fill:none;stroke-width:1.8}
+.rc-name{font-size:13px;font-weight:600;color:var(--text)}
+.rc-desc{font-size:11px;color:var(--text2);margin-top:3px}
+
+/* LOGIN */
+#pg-login{display:none;align-items:center;justify-content:center;min-height:100vh;padding:20px}
+#pg-login.show{display:flex}
+.login-box{background:var(--bg2);border:1px solid var(--border2);border-radius:20px;padding:36px;width:100%;max-width:380px;animation:fadeUp .25s ease}
+.l-icon{width:56px;height:56px;border-radius:14px;margin:0 auto 16px;display:flex;align-items:center;justify-content:center}
+.l-icon svg{width:26px;height:26px;fill:none;stroke-width:1.8}
+.l-title{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;text-align:center;margin-bottom:4px}
+.l-sub{font-size:12px;color:var(--text2);text-align:center;margin-bottom:22px}
+.l-label{font-size:12px;color:var(--text2);margin-bottom:5px;display:block}
+.l-input{width:100%;font-size:16px;padding:13px 14px;border:1px solid var(--border);border-radius:var(--rs);background:var(--bg3);color:var(--text);font-family:'DM Mono',monospace;letter-spacing:3px;outline:none;transition:border .15s;margin-bottom:6px}
+.l-input:focus{border-color:var(--blue-b)}
+.l-err{display:none;background:var(--red-bg);color:var(--red);border:1px solid var(--red-b);padding:10px 12px;border-radius:var(--rs);font-size:12px;margin-bottom:12px;text-align:center}
+.l-btn{width:100%;padding:13px;font-size:14px;font-weight:600;border:none;border-radius:var(--rs);cursor:pointer;font-family:'Syne',sans-serif;transition:all .15s;margin-bottom:8px}
+.l-back{width:100%;padding:9px;font-size:13px;background:none;border:none;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif}
+.l-hint{margin-top:12px;padding:10px 12px;background:var(--bg3);border-radius:var(--rs);font-size:11px;color:var(--text3);text-align:center;line-height:1.9;white-space:pre-line}
+
+/* APP LAYOUT */
+.app-wrap{display:none;flex-direction:column;min-height:100vh}
+.app-wrap.show{display:flex}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:12px 20px;border-bottom:1px solid var(--border);background:var(--bg2);position:sticky;top:0;z-index:50}
+.tb-l{display:flex;align-items:center;gap:10px}
+.tb-dot{width:9px;height:9px;border-radius:50%}
+.tb-name{font-family:'Syne',sans-serif;font-size:14px;font-weight:600}
+.tb-role{font-size:11px;color:var(--text2)}
+.logout-btn{padding:6px 14px;font-size:12px;background:var(--bg3);color:var(--text2);border:1px solid var(--border);border-radius:8px;cursor:pointer}
+.logout-btn:hover{border-color:var(--border2);color:var(--text)}
+.body{padding:20px;max-width:900px;margin:0 auto;width:100%}
+
+/* TABS */
+.tabs{display:flex;gap:2px;background:var(--bg3);border-radius:var(--rs);padding:3px;margin-bottom:18px}
+.tab{flex:1;padding:8px;font-size:12px;font-weight:500;border:none;background:none;color:var(--text2);cursor:pointer;border-radius:8px;transition:all .15s;font-family:'DM Sans',sans-serif;text-align:center}
+.tab.active{background:var(--bg2);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.5)}
+
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:18px;margin-bottom:14px}
+.card-title{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.09em;margin-bottom:14px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.f{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
+.f:last-child{margin-bottom:0}
+.f label{font-size:11px;color:var(--text2);font-weight:500}
+.req{color:var(--red)}
+.f input,.f select,.f textarea{font-size:13px;padding:10px 12px;border:1px solid var(--border);border-radius:var(--rs);background:var(--bg3);color:var(--text);outline:none;font-family:'DM Sans',sans-serif;transition:border .15s;width:100%}
+.f input:focus,.f select:focus,.f textarea:focus{border-color:var(--blue-b)}
+.f textarea{resize:none;height:60px}
+
+/* BUTTONS */
+.btn{padding:10px 20px;font-size:13px;font-weight:500;border:none;border-radius:var(--rs);cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s;display:inline-flex;align-items:center;gap:6px}
+.btn:active{transform:scale(.97)}
+.btn-full{width:100%;justify-content:center}
+.btn-green{background:var(--green);color:#000}
+.btn-green:hover{filter:brightness(1.1)}
+.btn-blue{background:var(--blue);color:#fff}
+.btn-blue:hover{filter:brightness(1.1)}
+.btn-ghost{background:var(--bg3);color:var(--text);border:1px solid var(--border)}
+.btn-ghost:hover{border-color:var(--border2)}
+.btn-danger{background:var(--red-bg);color:var(--red);border:1px solid var(--red-b)}
+.btn-sm{padding:6px 12px;font-size:11px}
+.add-form{border:1.5px dashed var(--border2);border-radius:var(--r);padding:18px;margin-top:4px}
+.add-form-title{font-size:13px;font-weight:500;color:var(--text2);margin-bottom:14px}
+
+/* PILLS */
+.pill{font-size:10px;padding:3px 10px;border-radius:20px;font-weight:500}
+.p-new{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-b)}
+.p-assigned{background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-b)}
+.p-pickup{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-b)}
+.p-transit{background:var(--purple-bg);color:var(--purple);border:1px solid var(--purple-b)}
+.p-done{background:var(--green-bg);color:var(--green);border:1px solid var(--green-b)}
+.p-rejected{background:var(--red-bg);color:var(--red);border:1px solid var(--red-b)}
+.p-pending{background:var(--red-bg);color:var(--red);border:1px solid var(--red-b)}
+
+/* USER LIST */
+.user-item{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rs);margin-bottom:6px}
+.ui-name{font-size:13px;font-weight:500}
+.ui-sub{font-size:11px;color:var(--text2);margin-top:2px;font-family:'DM Mono',monospace}
+.ui-extra{font-size:10px;color:var(--text3);margin-top:2px}
+.ui-actions{display:flex;gap:6px}
+
+/* TRIP CARD */
+.trip-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:10px;transition:border .2s}
+.trip-card.hl-blue{border-color:var(--blue-b)}
+.trip-card.hl-green{border-color:var(--green-b)}
+.trip-card.hl-red{border-color:var(--red-b)}
+.tc-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.tc-id{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:var(--blue)}
+.ig{display:grid;grid-template-columns:1fr 1fr;gap:5px 14px;margin-bottom:12px}
+.ig-label{font-size:10px;color:var(--text3)}
+.ig-val{font-size:12px;font-weight:500;color:var(--text)}
+.arow{display:flex;gap:8px}
+.ab{flex:1;padding:9px;font-size:12px;font-weight:500;border-radius:var(--rs);cursor:pointer;border:none;transition:all .15s;font-family:'DM Sans',sans-serif}
+.ab-accept{background:var(--green-bg);color:var(--green);border:1px solid var(--green-b)}
+.ab-accept:hover{background:var(--green);color:#000}
+.ab-reject{background:var(--red-bg);color:var(--red);border:1px solid var(--red-b)}
+.ab-reject:hover{background:var(--red);color:#fff}
+.subform{border-top:1px solid var(--border);margin-top:12px;padding-top:12px;display:none}
+.subform.open{display:block}
+.sf-title{font-size:12px;font-weight:500;color:var(--text2);margin-bottom:10px}
+
+/* DRIVER */
+.cx-box{background:var(--blue-bg);border:1px solid var(--blue-b);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.cx-num{font-family:'DM Mono',monospace;font-size:20px;font-weight:500;color:var(--blue)}
+.cx-name{font-size:11px;color:var(--blue);opacity:.75;margin-top:2px}
+.call-btn{padding:10px 18px;background:var(--blue);color:#fff;border:none;border-radius:var(--rs);font-size:13px;font-weight:500;cursor:pointer;font-family:'DM Sans',sans-serif}
+.route-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:14px}
+.route-head{padding:12px 16px;border-bottom:1px solid var(--border);font-size:11px;color:var(--text2);font-weight:500;text-transform:uppercase;letter-spacing:.06em}
+.route-body{padding:14px 16px}
+.r-stop{display:flex;gap:12px;align-items:flex-start;padding:8px 0}
+.r-stop:not(:last-child){border-bottom:1px solid var(--border)}
+.rdot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px}
+.rdot-g{background:var(--green);box-shadow:0 0 6px rgba(16,217,122,.4)}
+.rdot-r{background:var(--red);box-shadow:0 0 6px rgba(247,79,79,.4)}
+.rl{font-size:10px;color:var(--text3)}
+.rv{font-size:13px;font-weight:500;margin-top:1px}
+
+/* STEPS */
+.steps{display:flex;flex-direction:column}
+.step{display:flex;gap:12px}
+.step-l{display:flex;flex-direction:column;align-items:center;width:28px;flex-shrink:0}
+.sdot{width:26px;height:26px;border-radius:50%;border:2px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;font-family:'DM Mono',monospace;color:var(--text3);background:var(--bg);transition:all .3s}
+.sdot.done{background:var(--green);border-color:var(--green);color:#000}
+.sdot.cur{background:var(--blue-bg);border-color:var(--blue);color:var(--blue)}
+.sline{width:2px;background:var(--border);flex:1;min-height:10px;margin:2px 0;transition:background .3s}
+.sline.done{background:var(--green)}
+.step-r{flex:1;padding-bottom:16px}
+.stitle{font-size:13px;font-weight:500}
+.ssub{font-size:11px;color:var(--text2);margin-top:2px}
+.stime{font-size:10px;color:var(--green);margin-top:3px;font-family:'DM Mono',monospace}
+.sbtn{padding:8px 16px;font-size:12px;font-weight:500;border:none;border-radius:var(--rs);cursor:pointer;margin-top:9px;display:none;font-family:'DM Sans',sans-serif;transition:all .15s}
+.sbtn.show{display:inline-block}
+.sbtn:disabled{opacity:.35;cursor:not-allowed;pointer-events:none}
+.sbtn-blue{background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue-b)}
+.sbtn-blue:hover:not(:disabled){background:var(--blue);color:#fff}
+.sbtn-green{background:var(--green-bg);color:var(--green);border:1px solid var(--green-b)}
+.sbtn-green:hover:not(:disabled){background:var(--green);color:#000}
+.photo-note{font-size:11px;background:var(--amber-bg);color:var(--amber);border:1px solid var(--amber-b);padding:8px 12px;border-radius:var(--rs);margin-bottom:8px;display:none}
+.photo-note.show{display:block}
+.photo-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:8px;display:none}
+.photo-grid.show{display:grid}
+.pslot{aspect-ratio:1;border:1.5px dashed var(--border2);border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;background:var(--bg3);font-size:9px;color:var(--text3);text-align:center;gap:3px;transition:all .2s}
+.pslot:hover{border-color:var(--blue)}
+.pslot.cap{border-style:solid;border-color:var(--green);background:var(--green-bg)}
+.pslot svg{width:14px;height:14px}
+.km-row{display:none;gap:8px;align-items:center;margin-top:10px}
+.km-row.show{display:flex}
+.km-row input{font-size:14px;padding:9px 12px;border:1px solid var(--border);border-radius:var(--rs);background:var(--bg3);color:var(--green);width:110px;font-family:'DM Mono',monospace;outline:none;text-align:center}
+.km-row input:focus{border-color:var(--green-b)}
+.done-banner{background:var(--green-bg);border:1px solid var(--green-b);border-radius:var(--r);padding:20px;text-align:center;font-size:15px;font-weight:600;color:var(--green);display:none;margin-top:12px;font-family:'Syne',sans-serif}
+
+/* ADMIN */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.stat{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center}
+.stat-num{font-family:'DM Mono',monospace;font-size:26px;font-weight:500}
+.stat-label{font-size:11px;color:var(--text2);margin-top:3px}
+.city-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.city-row:last-child{border:none}
+.city-name{font-size:13px;font-weight:500;min-width:90px}
+.city-bar{flex:1;height:4px;background:var(--bg3);border-radius:2px;overflow:hidden}
+.city-fill{height:100%;background:var(--green);border-radius:2px}
+.city-pct{font-family:'DM Mono',monospace;font-size:11px;color:var(--text2);min-width:34px;text-align:right}
+.city-pills{display:flex;gap:4px}
+.cn{font-size:9px;padding:2px 7px;border-radius:20px}
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:600px}
+th{padding:8px 12px;text-align:left;color:var(--text3);font-weight:500;border-bottom:1px solid var(--border);background:var(--bg3);white-space:nowrap;font-family:'DM Mono',monospace;font-size:11px}
+td{padding:8px 12px;border-bottom:1px solid var(--border);color:var(--text);white-space:nowrap}
+tr:hover td{background:var(--bg3)}
+.mono{font-family:'DM Mono',monospace}
+.empty-state{text-align:center;padding:2rem;color:var(--text3);font-size:13px}
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading"><div class="spinner"></div><div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:600;margin-bottom:4px">TowTrack</div><div style="font-size:13px;color:var(--text2)">Loading...</div></div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<!-- LANDING -->
+<div id="pg-landing" class="page show">
+  <div class="landing-box">
+    <div class="app-logo">
+      <div class="logo-icon"><svg viewBox="0 0 24 24"><path d="M1 3h15v13H1z"/><path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg></div>
+      <div class="app-name">TowTrack</div>
+      <div class="app-sub">Towing management system</div>
+    </div>
+    <div class="role-grid">
+      <div class="role-card" onclick="goLogin('ground')">
+        <div class="rc-icon" style="background:var(--green-bg)"><svg viewBox="0 0 24 24" stroke="var(--green)"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+        <div class="rc-name">Ground Team</div>
+        <div class="rc-desc">Trip create karo</div>
+      </div>
+      <div class="role-card" onclick="goLogin('vendor')">
+        <div class="rc-icon" style="background:var(--amber-bg)"><svg viewBox="0 0 24 24" stroke="var(--amber)"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-4 0v2"/></svg></div>
+        <div class="rc-name">Vendor</div>
+        <div class="rc-desc">Trips manage karo</div>
+      </div>
+      <div class="role-card" onclick="goLogin('driver')">
+        <div class="rc-icon" style="background:var(--blue-bg)"><svg viewBox="0 0 24 24" stroke="var(--blue)"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div class="rc-name">Driver</div>
+        <div class="rc-desc">Trip complete karo</div>
+      </div>
+      <div class="role-card" onclick="goLogin('admin')">
+        <div class="rc-icon" style="background:var(--purple-bg)"><svg viewBox="0 0 24 24" stroke="var(--purple)"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg></div>
+        <div class="rc-name">Admin</div>
+        <div class="rc-desc">Full access</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="pg-login">
+  <div class="login-box">
+    <div class="l-icon" id="l-icon"></div>
+    <div class="l-title" id="l-title"></div>
+    <div class="l-sub" id="l-sub"></div>
+    <label class="l-label">Registered mobile number</label>
+    <input class="l-input" type="tel" id="l-mob" maxlength="10" placeholder="10-digit mobile" oninput="this.value=this.value.replace(/\D/g,'')" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <div class="l-err" id="l-err"></div>
+    <button class="l-btn" id="l-btn" onclick="doLogin()">Login</button>
+    <button class="l-back" onclick="goLanding()">← Back</button>
+    <div class="l-hint" id="l-hint"></div>
+  </div>
+</div>
+
+<!-- GROUND TEAM -->
+<div id="app-ground" class="app-wrap">
+  <div class="topbar">
+    <div class="tb-l"><div class="tb-dot" style="background:var(--green)"></div><div><div class="tb-name" id="gt-uname">Ground Team</div><div class="tb-role">Ground Team Portal</div></div></div>
+    <button class="logout-btn" onclick="doLogout()">Logout</button>
+  </div>
+  <div class="body">
+    <div class="tabs">
+      <button class="tab active" id="gt-tab-new" onclick="gtSwitch('new',this)">New request</button>
+      <button class="tab" id="gt-tab-my" onclick="gtSwitch('my',this)">My trips</button>
+    </div>
+    <div id="gt-new">
+      <div class="card">
+        <div class="card-title">Vehicle details</div>
+        <div class="grid3">
+          <div class="f"><label>Trip ID</label><input id="g-tid" readonly style="color:var(--text3)"/></div>
+          <div class="f"><label>Vehicle no <span class="req">*</span></label><input id="g-vno" placeholder="HR01AB1234"/></div>
+          <div class="f"><label>Vehicle type <span class="req">*</span></label><select id="g-vtype"><option>Hatchback</option><option>Sedan</option><option>SUV</option></select></div>
+        </div>
+        <div class="grid2">
+          <div class="f"><label>Crane type <span class="req">*</span></label><select id="g-crane"><option>Flatbed</option><option>Under lift</option></select></div>
+          <div class="f"><label>Condition</label><select id="g-cond"><option>Good</option><option>Damaged</option><option>Non-start</option></select></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Owner details</div>
+        <div class="grid2">
+          <div class="f"><label>Owner name <span class="req">*</span></label><input id="g-oname" placeholder="Full name"/></div>
+          <div class="f"><label>Owner phone <span class="req">*</span></label><input id="g-ophone" placeholder="10-digit mobile" maxlength="10"/></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Location + vendor</div>
+        <div class="grid2">
+          <div class="f"><label>Pickup <span class="req">*</span></label><input id="g-pickup" placeholder="Full pickup address"/></div>
+          <div class="f"><label>Drop <span class="req">*</span></label><input id="g-drop" placeholder="Full drop address"/></div>
+        </div>
+        <div class="grid3">
+          <div class="f"><label>Approx KM</label><input type="number" id="g-km" placeholder="25"/></div>
+          <div class="f"><label>City <span class="req">*</span></label>
+            <select id="g-city" onchange="loadVendorDropdown()">
+              <option value="">Select city</option>
+              <option>Delhi</option><option>Gurgaon</option><option>Noida</option><option>Faridabad</option><option>Chandigarh</option>
+            </select>
+          </div>
+          <div class="f"><label>Vendor <span class="req">*</span></label><select id="g-vendor"><option value="">Select city first</option></select></div>
+        </div>
+      </div>
+      <button class="btn btn-green btn-full" onclick="submitTrip()">Submit request to vendor</button>
+    </div>
+    <div id="gt-my" style="display:none"><div id="gt-trips-list"></div></div>
+  </div>
+</div>
+
+<!-- VENDOR -->
+<div id="app-vendor" class="app-wrap">
+  <div class="topbar">
+    <div class="tb-l"><div class="tb-dot" style="background:var(--amber)"></div><div><div class="tb-name" id="v-uname">Vendor</div><div class="tb-role">Vendor Portal</div></div></div>
+    <button class="logout-btn" onclick="doLogout()">Logout</button>
+  </div>
+  <div class="body">
+    <div class="tabs">
+      <button class="tab active" onclick="vSwitch('req',this)">New requests</button>
+      <button class="tab" onclick="vSwitch('active',this)">Active trips</button>
+    </div>
+    <div id="vt-req"><div id="v-req-list"></div></div>
+    <div id="vt-active" style="display:none"><div id="v-active-list"></div></div>
+  </div>
+</div>
+
+<!-- DRIVER -->
+<div id="app-driver" class="app-wrap">
+  <div class="topbar">
+    <div class="tb-l"><div class="tb-dot" style="background:var(--blue)"></div><div><div class="tb-name" id="d-uname">Driver</div><div class="tb-role">Driver Portal</div></div></div>
+    <button class="logout-btn" onclick="doLogout()">Logout</button>
+  </div>
+  <div class="body">
+    <div id="d-no-trip" class="empty-state" style="display:none">Abhi koi trip assigned nahi hai.</div>
+    <div id="d-trip-wrap">
+      <div class="card" style="border-color:var(--blue-b);margin-bottom:14px">
+        <div class="card-title">My trip</div>
+        <div class="ig" id="d-trip-info"></div>
+      </div>
+      <div class="cx-box">
+        <div><div class="cx-name">Customer contact</div><div class="cx-num" id="d-cx-num"></div><div class="cx-name" id="d-cx-name" style="margin-top:3px"></div></div>
+        <button class="call-btn" id="d-call-btn">📞 Call CX</button>
+      </div>
+      <div class="route-card">
+        <div class="route-head">Trip route</div>
+        <div class="route-body">
+          <div class="r-stop"><div class="rdot rdot-g"></div><div><div class="rl">Pickup</div><div class="rv" id="d-pickup-addr"></div></div></div>
+          <div class="r-stop"><div class="rdot rdot-r"></div><div><div class="rl">Drop</div><div class="rv" id="d-drop-addr"></div></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">Status updates</div>
+        <div class="steps">
+          <div class="step"><div class="step-l"><div class="sdot done">✓</div><div class="sline done"></div></div><div class="step-r"><div class="stitle">Driver assigned</div><div class="stime" id="d-t0"></div></div></div>
+          <div class="step">
+            <div class="step-l"><div class="sdot cur" id="d-dot-1">1</div><div class="sline" id="d-line-1"></div></div>
+            <div class="step-r">
+              <div class="stitle">Reached pickup</div><div class="ssub" id="d-ssub-1"></div>
+              <div class="stime" id="d-time-1" style="display:none"></div>
+              <div class="photo-note show" id="d-pnote-1">📸 4 photos mandatory — Front, Rear, Left, Right</div>
+              <div class="photo-grid show" id="d-pgrid-1">
+                <div class="pslot" id="dp1-0" onclick="capPhoto(1,0,'Front')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="16" height="12" rx="2"/><circle cx="10" cy="11" r="3"/><path d="M7 5l1-2h4l1 2"/></svg>Front</div>
+                <div class="pslot" id="dp1-1" onclick="capPhoto(1,1,'Rear')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="16" height="12" rx="2"/><circle cx="10" cy="11" r="3"/><path d="M7 5l1-2h4l1 2"/></svg>Rear</div>
+                <div class="pslot" id="dp1-2" onclick="capPhoto(1,2,'Left')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="16" height="12" rx="2"/><circle cx="10" cy="11" r="3"/><path d="M7 5l1-2h4l1 2"/></svg>Left</div>
+                <div class="pslot" id="dp1-3" onclick="capPhoto(1,3,'Right')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="16" height="12" rx="2"/><circle cx="10" cy="11" r="3"/><path d="M7 5l1-2h4l1 2"/></svg>Right</div>
+              </div>
+              <button class="sbtn sbtn-blue show" id="d-btn-1" onclick="dStep(1)" disabled>Mark — Reached pickup</button>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-l"><div class="sdot" id="d-dot-2">2</div><div class="sline" id="d-line-2"></div></div>
+            <div class="step-r"><div class="stitle">In transit</div><div class="ssub">Vehicle loaded, moving to drop</div><div class="stime" id="d-time-2" style="display:none"></div><button class="sbtn sbtn-blue" id="d-btn-2" onclick="dStep(2)">Mark — In transit</button></div>
+          </div>
+          <div class="step">
+            <div class="step-l"><div class="sdot" id="d-dot-3">3</div><div class="sline" id="d-line-3"></div></div>
+            <div class="step-r">
+              <div class="stitle">Reached drop</div><div class="ssub" id="d-ssub-3"></div><div class="stime" id="d-time-3" style="display:none"></div>
+              <div class="photo-note" id="d-pnote-3">📸 4 drop photos mandatory — Front, Rear, Left, Right</div>
+              <div class="photo-grid" id="d-pgrid-3">
+                <div class="pslot" id="dp3-0" onclick="capPhoto(3,0,'Front')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="16" height="12" rx="2"/><circle cx="10" cy="11" r="3"/><path d="M7 5l1-2h4l1 2"/></svg>Front</div>
+                <div class="pslot" id="dp3-1" onclick="capPhoto(3,1,'Rear')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="16" height="12" rx="2"/><circle cx="10" cy="11" r="3"/><path d="M7 5l1-2h4l1 2"/></svg>Rear</div>
+                <div class="pslot" id="dp3-2" onclick="capPhoto(3,2,'Left')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="16" height="12" rx="2"/><circle cx="10" cy="11" r="3"/><path d="M7 5l1-2h4l1 2"/></svg>Left</div>
+                <div class="pslot" id="dp3-3" onclick="capPhoto(3,3,'Right')"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="16" height="12" rx="2"/><circle cx="10" cy="11" r="3"/><path d="M7 5l1-2h4l1 2"/></svg>Right</div>
+              </div>
+              <button class="sbtn sbtn-blue" id="d-btn-3" onclick="dStep(3)" disabled>Mark — Reached drop</button>
+            </div>
+          </div>
+          <div class="step">
+            <div class="step-l"><div class="sdot" id="d-dot-4">4</div></div>
+            <div class="step-r"><div class="stitle">Complete trip</div><div class="ssub">Actual KM enter karo</div>
+              <div class="km-row" id="d-km-row"><input type="number" id="d-km" placeholder="28"/><span style="font-size:12px;color:var(--text2)">km</span><button class="sbtn sbtn-green show" onclick="completeTrip()" style="margin-top:0">Complete</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="done-banner" id="d-done">🎉 Trip completed! Sab data save ho gaya.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="app-admin" class="app-wrap">
+  <div class="topbar">
+    <div class="tb-l"><div class="tb-dot" style="background:var(--purple)"></div><div><div class="tb-name" id="a-uname">Admin</div><div class="tb-role">Central Team — Full Access</div></div></div>
+    <button class="logout-btn" onclick="doLogout()">Logout</button>
+  </div>
+  <div class="body">
+    <div class="tabs">
+      <button class="tab active" onclick="aSwitch('dash',this)">Dashboard</button>
+      <button class="tab" onclick="aSwitch('vendors',this)">Vendors</button>
+      <button class="tab" onclick="aSwitch('ground',this)">Ground team</button>
+      <button class="tab" onclick="aSwitch('log',this)">Activity log</button>
+    </div>
+    <div id="at-dash">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px">
+        <button class="btn btn-ghost btn-sm" onclick="dashFilter('today',this)" style="border-color:var(--blue-b);color:var(--blue)">Today</button>
+        <button class="btn btn-ghost btn-sm" onclick="dashFilter('week',this)">This week</button>
+        <button class="btn btn-ghost btn-sm" onclick="dashFilter('month',this)">This month</button>
+        <button class="btn btn-ghost btn-sm" onclick="dashFilter('all',this)">All time</button>
+        <button class="btn btn-ghost btn-sm" onclick="downloadCSV()" style="margin-left:auto">↓ CSV</button>
+      </div>
+      <div class="stats-grid">
+        <div class="stat"><div class="stat-num" id="s-total">0</div><div class="stat-label">Total trips</div></div>
+        <div class="stat"><div class="stat-num" id="s-done" style="color:var(--green)">0</div><div class="stat-label">Completed</div></div>
+        <div class="stat"><div class="stat-num" id="s-prog" style="color:var(--blue)">0</div><div class="stat-label">In progress</div></div>
+        <div class="stat"><div class="stat-num" id="s-pend" style="color:var(--red)">0</div><div class="stat-label">Pending</div></div>
+      </div>
+      <div class="card"><div class="card-title">City-wise breakdown</div><div id="city-stats"></div></div>
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px"><div class="card-title" style="margin:0">All trips</div></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Trip ID</th><th>Vehicle</th><th>Owner</th><th>City</th><th>Vendor</th><th>Driver</th><th>Created by</th><th>Status</th></tr></thead><tbody id="a-trips-body"></tbody></table></div>
+      </div>
+    </div>
+    <div id="at-vendors" style="display:none">
+      <div class="card"><div class="card-title">Registered vendors</div><div id="a-vendor-list"></div></div>
+      <div class="add-form">
+        <div class="add-form-title">Add new vendor</div>
+        <div class="grid3">
+          <div class="f"><label>Vendor name <span class="req">*</span></label><input id="av-name" placeholder="Company name"/></div>
+          <div class="f"><label>City <span class="req">*</span></label><select id="av-city"><option value="">Select</option><option>Delhi</option><option>Gurgaon</option><option>Noida</option><option>Faridabad</option><option>Chandigarh</option></select></div>
+          <div class="f"><label>Rate per trip (₹)</label><input type="number" id="av-rate" placeholder="e.g. 1400"/></div>
+        </div>
+        <div class="grid2">
+          <div class="f"><label>Primary mobile <span class="req">*</span></label><input id="av-mob1" placeholder="Primary number" maxlength="10" oninput="this.value=this.value.replace(/\D/g,'')"/></div>
+          <div class="f"><label>Secondary mobile (optional)</label><input id="av-mob2" placeholder="Second number" maxlength="10" oninput="this.value=this.value.replace(/\D/g,'')"/></div>
+        </div>
+        <div class="f"><label>Crane types</label><select id="av-crane"><option>Both</option><option>Flatbed only</option><option>Under lift only</option></select></div>
+        <button class="btn btn-blue" style="margin-top:4px" onclick="addVendor()">Add vendor</button>
+      </div>
+    </div>
+    <div id="at-ground" style="display:none">
+      <div class="card"><div class="card-title">Ground team members</div><div id="a-gt-list"></div></div>
+      <div class="add-form">
+        <div class="add-form-title">Add ground team member</div>
+        <div class="grid3">
+          <div class="f"><label>Name <span class="req">*</span></label><input id="agt-name" placeholder="Full name"/></div>
+          <div class="f"><label>Mobile <span class="req">*</span></label><input id="agt-mob" placeholder="10-digit number" maxlength="10" oninput="this.value=this.value.replace(/\D/g,'')"/></div>
+          <div class="f"><label>City</label><select id="agt-city"><option value="">Select</option><option>Delhi</option><option>Gurgaon</option><option>Noida</option><option>Faridabad</option><option>Chandigarh</option></select></div>
+        </div>
+        <button class="btn btn-green" onclick="addGT()">Add member</button>
+      </div>
+    </div>
+    <div id="at-log" style="display:none">
+      <div class="card"><div class="card-title">Activity log — kisne kya kiya</div>
+        <div class="tbl-wrap"><table><thead><tr><th>Time</th><th>Name</th><th>Mobile</th><th>Role</th><th>Action</th><th>Details</th></tr></thead><tbody id="a-log-body"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const API = 'https://script.google.com/macros/s/AKfycby6AfoLJvhGhhXDmP85oPUiy09OvmDyTh1heEPxeb3lvR1eu-QCOri9VSKLXY78GIiH/exec';
+
+// ── DATA ──────────────────────────────────────────────────
+let DB = {
+  admin:   [{name:'Vinod Yadav', mobile:'9873640342', role:'Super Admin'}],
+  ground:  [],
+  vendors: [],
+  trips:   [],
+  logs:    []
+};
+
+let CU = null; // current user
+let CR = null; // current role
+const PC = {1:0, 3:0}; // photo counts
+
+// ── SESSION ───────────────────────────────────────────────
+function saveSession() {
+  try { sessionStorage.setItem('tt_u', JSON.stringify(CU)); sessionStorage.setItem('tt_r', CR); } catch(e){}
+}
+function clearSession() {
+  try { sessionStorage.removeItem('tt_u'); sessionStorage.removeItem('tt_r'); } catch(e){}
+}
+function getSession() {
+  try {
+    const u = sessionStorage.getItem('tt_u');
+    const r = sessionStorage.getItem('tt_r');
+    if(u && r) return {user: JSON.parse(u), role: r};
+  } catch(e){}
+  return null;
+}
+
+// ── SHEET ─────────────────────────────────────────────────
+async function sheetPost(data) {
+  try { await fetch(API, {method:'POST', body:JSON.stringify(data)}); } catch(e){}
+}
+async function sheetGet() {
+  try {
+    const r = await fetch(API, {redirect:'follow'});
+    const t = await r.text();
+    return JSON.parse(t);
+  } catch(e) { return null; }
+}
+async function saveUsers() {
+  await sheetPost({action:'save_ground_team', members: DB.ground});
+  await sheetPost({action:'save_vendors', vendors: DB.vendors.map(v=>({name:v.name,city:v.city,mobile1:v.mobile1,mobile2:v.mobile2||'',crane:v.crane,rate:v.rate||''}))});
+}
+async function logAct(name, mob, role, action, details) {
+  const e = {time:new Date().toLocaleString('en-IN'), name, mobile:mob, role, action, details};
+  DB.logs.unshift(e);
+  await sheetPost({action:'activity_log', userName:name, userMobile:mob, role, activity:action, details, time:e.time});
+}
+
+// ── TOAST ─────────────────────────────────────────────────
+function toast(msg, type='green') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast-'+type;
+  el.style.display = 'block';
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>el.style.display='none', 3500);
+}
+
+// ── PAGES ─────────────────────────────────────────────────
+function showPage(id) {
+  document.querySelectorAll('.page,.app-wrap,#pg-login').forEach(el=>{
+    el.classList.remove('show');
+    el.style.display='';
+  });
+  const el = document.getElementById(id);
+  if(el.classList.contains('app-wrap')) el.classList.add('show');
+  else if(id==='pg-login') { el.style.display='flex'; }
+  else el.classList.add('show');
+}
+function goLanding() { showPage('pg-landing'); }
+
+// ── LOGIN ─────────────────────────────────────────────────
+const RC = {
+  ground: {title:'Ground Team',sub:'Apna registered mobile number daalo',icon:'<path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/>',bg:'var(--green-bg)',stroke:'var(--green)',btn:'var(--green)',btnC:'#000'},
+  vendor: {title:'Vendor Portal',sub:'Onboarding wala mobile number daalo',icon:'<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 00-4 0v2"/>',bg:'var(--amber-bg)',stroke:'var(--amber)',btn:'var(--amber)',btnC:'#000'},
+  driver: {title:'Driver Portal',sub:'Vendor ne jo number register kiya wo daalo',icon:'<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',bg:'var(--blue-bg)',stroke:'var(--blue)',btn:'var(--blue)',btnC:'#fff'},
+  admin:  {title:'Admin Portal',sub:'Central team registered mobile daalo',icon:'<rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/>',bg:'var(--purple-bg)',stroke:'var(--purple)',btn:'var(--purple)',btnC:'#fff'}
+};
+function goLogin(role) {
+  CR = role;
+  const c = RC[role];
+  document.getElementById('l-icon').style.background = c.bg;
+  document.getElementById('l-icon').innerHTML = `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="${c.stroke}" stroke-width="1.8">${c.icon}</svg>`;
+  document.getElementById('l-title').textContent = c.title;
+  document.getElementById('l-sub').textContent = c.sub;
+  document.getElementById('l-btn').style.cssText = `background:${c.btn};color:${c.btnC}`;
+  document.getElementById('l-mob').value = '';
+  document.getElementById('l-err').style.display = 'none';
+  // Hint
+  let hint = 'Registered numbers:\n';
+  if(role==='admin') hint += DB.admin.map(u=>u.mobile+' ('+u.name+')').join('\n');
+  else if(role==='ground') hint += DB.ground.length ? DB.ground.map(u=>u.mobile+' — '+u.name).join('\n') : 'Admin ne abhi koi member add nahi kiya';
+  else if(role==='vendor') hint += DB.vendors.length ? DB.vendors.map(v=>v.mobile1+' — '+v.name).join('\n') : 'Admin ne abhi koi vendor add nahi kiya';
+  else hint += 'Vendor ne assign kiya hoga';
+  document.getElementById('l-hint').textContent = hint;
+  showPage('pg-login');
+  setTimeout(()=>document.getElementById('l-mob').focus(), 150);
+}
+async function doLogin() {
+  const mob = document.getElementById('l-mob').value.trim();
+  const errEl = document.getElementById('l-err');
+  if(mob.length!==10){errEl.textContent='10-digit mobile number daalo!';errEl.style.display='block';return;}
+  let user = null;
+  if(CR==='admin') user = DB.admin.find(u=>u.mobile===mob);
+  else if(CR==='ground') user = DB.ground.find(u=>u.mobile===mob);
+  else if(CR==='vendor') {
+    for(const v of DB.vendors){
+      if(v.mobile1===mob||v.mobile2===mob){user={name:v.name,mobile:mob,vendorData:v};break;}
+    }
+  }
+  else if(CR==='driver') {
+    for(const t of DB.trips){
+      if(t.driverMobile===mob && t.status!=='Completed'){user={name:t.driver,mobile:mob,tripId:t.id};break;}
+    }
+    if(!user){
+      for(const t of DB.trips){
+        if(t.driverMobile===mob){user={name:t.driver,mobile:mob,tripId:t.id};break;}
+      }
+    }
+  }
+  if(!user){errEl.textContent='Ye number registered nahi hai! Admin se contact karo.';errEl.style.display='block';return;}
+  CU = {...user, role:CR};
+  saveSession();
+  await logAct(user.name, mob, CR, 'Login', 'Portal access');
+  loadPortal(CR, CU);
+  toast('Welcome, '+user.name+'! 👋');
+}
+function doLogout() {
+  clearSession();
+  CU = null; CR = null;
+  goLanding();
+}
+
+// ── LOAD PORTAL ───────────────────────────────────────────
+function loadPortal(role, user) {
+  if(role==='ground') loadGround(user);
+  else if(role==='vendor') loadVendor(user);
+  else if(role==='driver') loadDriver(user);
+  else if(role==='admin') loadAdmin(user);
+}
+
+// ── GROUND TEAM ───────────────────────────────────────────
+function loadGround(user) {
+  showPage('app-ground');
+  document.getElementById('gt-uname').textContent = user.name+(user.city?' — '+user.city:'');
+  document.getElementById('g-tid').value = 'TRP-'+Date.now().toString().slice(-5);
+}
+function gtSwitch(t, el) {
+  document.querySelectorAll('#app-ground .tab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('gt-new').style.display = t==='new'?'block':'none';
+  document.getElementById('gt-my').style.display = t==='my'?'block':'none';
+  if(t==='my') renderMyTrips();
+}
+function loadVendorDropdown() {
+  const city = document.getElementById('g-city').value;
+  const sel = document.getElementById('g-vendor');
+  const list = DB.vendors.filter(v=>v.city===city);
+  sel.innerHTML = list.length ? list.map(v=>`<option value="${v.name}">${v.name}</option>`).join('') : '<option value="">No vendors in this city</option>';
+}
+async function submitTrip() {
+  const vno=document.getElementById('g-vno').value.trim();
+  const owner=document.getElementById('g-oname').value.trim();
+  const city=document.getElementById('g-city').value;
+  const vendor=document.getElementById('g-vendor').value;
+  if(!vno||!owner||!city||!vendor){toast('Sabhi required fields fill karo!','red');return;}
+  const tid = document.getElementById('g-tid').value;
+  const trip = {
+    id:tid, vno, vtype:document.getElementById('g-vtype').value,
+    crane:document.getElementById('g-crane').value, cond:document.getElementById('g-cond').value,
+    owner, ownerPhone:document.getElementById('g-ophone').value,
+    pickup:document.getElementById('g-pickup').value,
+    drop:document.getElementById('g-drop').value,
+    city, vendorName:vendor, km:document.getElementById('g-km').value,
+    status:'Pending', driver:'', driverMobile:'',
+    createdBy:CU.name, createdMobile:CU.mobile,
+    createdAt:new Date().toISOString()
+  };
+  DB.trips.unshift(trip);
+  await sheetPost({action:'add_trip',...trip,assignedAt:new Date().toLocaleString()});
+  await logAct(CU.name,CU.mobile,'Ground Team','Trip created',`${tid} | ${vno} | ${city} | Vendor: ${vendor}`);
+  // WhatsApp to vendor
+  const v = DB.vendors.find(x=>x.name===vendor);
+  if(v?.mobile1){
+    const url = window.location.href.split('?')[0];
+    const msg = `🚛 *TowTrack — Nayi Trip Request*\n\nTrip ID: *${tid}*\nVehicle: ${trip.vtype} — ${vno}\nCrane: ${trip.crane}\nOwner: ${owner} (${trip.ownerPhone})\nPickup: ${trip.pickup}\nDrop: ${trip.drop}\n\nCreated by: ${CU.name}\n\n✅ Portal: ${url}\n_Vendor portal login karein — SLA 60 min!_`;
+    window.open(`https://wa.me/91${v.mobile1}?text=${encodeURIComponent(msg)}`,'_blank');
+  }
+  toast(`${tid} submitted! Vendor ko WhatsApp bheja ✅`);
+  document.getElementById('g-tid').value = 'TRP-'+Date.now().toString().slice(-5);
+  ['g-vno','g-oname','g-ophone','g-pickup','g-drop','g-km'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('g-city').value=''; document.getElementById('g-vendor').innerHTML='<option value="">Select city first</option>';
+}
+function renderMyTrips() {
+  const list = DB.trips.filter(t=>t.createdMobile===CU.mobile);
+  const el = document.getElementById('gt-trips-list');
+  el.innerHTML = list.length ? list.map(t=>`
+    <div class="trip-card">
+      <div class="tc-top"><span class="tc-id">${t.id}</span><span class="pill p-${sc(t.status)}">${t.status}</span></div>
+      <div class="ig">
+        <div><div class="ig-label">Vehicle</div><div class="ig-val">${t.vtype} — ${t.vno}</div></div>
+        <div><div class="ig-label">Vendor</div><div class="ig-val">${t.vendorName}</div></div>
+        <div><div class="ig-label">Driver</div><div class="ig-val">${t.driver||'Not assigned'}</div></div>
+        <div><div class="ig-label">Route</div><div class="ig-val">${t.pickup} → ${t.drop}</div></div>
+      </div>
+    </div>`).join('') : '<div class="empty-state">Abhi koi trip nahi</div>';
+}
+
+// ── VENDOR ────────────────────────────────────────────────
+function loadVendor(user) {
+  showPage('app-vendor');
+  document.getElementById('v-uname').textContent = user.name;
+  renderVendorReqs(user);
+  renderVendorActive(user);
+}
+function vSwitch(t, el) {
+  document.querySelectorAll('#app-vendor .tab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('vt-req').style.display = t==='req'?'block':'none';
+  document.getElementById('vt-active').style.display = t==='active'?'block':'none';
+}
+function renderVendorReqs(user) {
+  const trips = DB.trips.filter(t=>t.vendorName===user.name && t.status==='Pending');
+  const el = document.getElementById('v-req-list');
+  el.innerHTML = trips.length ? trips.map((t,i)=>`
+    <div class="trip-card hl-blue" id="vtc-${i}">
+      <div class="tc-top"><span class="tc-id">${t.id}</span><span class="pill p-new">New</span></div>
+      <div class="ig">
+        <div><div class="ig-label">Owner</div><div class="ig-val">${t.owner} — ${t.ownerPhone}</div></div>
+        <div><div class="ig-label">Vehicle</div><div class="ig-val">${t.vtype} — ${t.vno}</div></div>
+        <div><div class="ig-label">Crane</div><div class="ig-val">${t.crane}</div></div>
+        <div><div class="ig-label">Condition</div><div class="ig-val">${t.cond}</div></div>
+        <div><div class="ig-label">Pickup</div><div class="ig-val">${t.pickup}</div></div>
+        <div><div class="ig-label">Drop</div><div class="ig-val">${t.drop}</div></div>
+      </div>
+      <div class="arow">
+        <button class="ab ab-accept" onclick="vAccept(${i})">Accept</button>
+        <button class="ab ab-reject" onclick="vReject(${i})">Reject</button>
+      </div>
+      <div class="subform" id="vsf-${i}">
+        <div class="sf-title">Driver naam + mobile daalo — WhatsApp jayega</div>
+        <div class="grid2">
+          <div class="f"><label>Driver naam *</label><input id="vdn-${i}" placeholder="Full name"/></div>
+          <div class="f"><label>Driver mobile *</label><input id="vdm-${i}" placeholder="10-digit" maxlength="10" oninput="this.value=this.value.replace(/\D/g,'')"/></div>
+        </div>
+        <button class="btn btn-green btn-full" style="margin-top:8px" onclick="vConfirm(${i},'${t.id}')">Confirm + WhatsApp driver ko bhejo</button>
+      </div>
+      <div class="subform" id="vrf-${i}">
+        <div class="f"><label>Rejection reason</label><textarea id="vrr-${i}" placeholder="Reason..."></textarea></div>
+        <button class="btn btn-danger btn-full" style="margin-top:6px" onclick="vConfirmReject(${i},'${t.id}')">Confirm rejection</button>
+      </div>
+    </div>`).join('') : '<div class="empty-state">Koi pending request nahi</div>';
+}
+function renderVendorActive(user) {
+  const trips = DB.trips.filter(t=>t.vendorName===user.name && ['Assigned','At pickup','In transit','Reached drop'].includes(t.status));
+  const el = document.getElementById('v-active-list');
+  el.innerHTML = trips.length ? trips.map(t=>`
+    <div class="trip-card hl-green">
+      <div class="tc-top"><span class="tc-id">${t.id}</span><span class="pill p-${sc(t.status)}">${t.status}</span></div>
+      <div class="ig">
+        <div><div class="ig-label">Vehicle</div><div class="ig-val">${t.vtype} — ${t.vno}</div></div>
+        <div><div class="ig-label">Driver</div><div class="ig-val">${t.driver} — ${t.driverMobile}</div></div>
+        <div><div class="ig-label">Pickup</div><div class="ig-val">${t.pickup}</div></div>
+        <div><div class="ig-label">Drop</div><div class="ig-val">${t.drop}</div></div>
+      </div>
+    </div>`).join('') : '<div class="empty-state">Koi active trip nahi</div>';
+}
+function vAccept(i){document.getElementById('vsf-'+i).classList.add('open');}
+function vReject(i){document.getElementById('vrf-'+i).classList.add('open');}
+async function vConfirm(i, id) {
+  const dName=document.getElementById('vdn-'+i).value.trim();
+  const dMob=document.getElementById('vdm-'+i).value.trim();
+  if(!dName||dMob.length!==10){toast('Driver naam aur 10-digit mobile daalo!','red');return;}
+  const trip=DB.trips.find(t=>t.id===id);
+  if(trip){trip.status='Assigned';trip.driver=dName;trip.driverMobile=dMob;}
+  await sheetPost({action:'add_trip',tripId:id,status:'Assigned',driverName:dName,driverMobile:dMob,assignedAt:new Date().toLocaleString()});
+  await logAct(CU.name,CU.mobile,'Vendor','Trip accepted + driver assigned',`${id} | Driver: ${dName} (${dMob})`);
+  const url=window.location.href.split('?')[0];
+  const msg=`🚛 *TowTrack — Aapko Trip Assign Hui!*\n\nTrip ID: *${id}*\nVehicle: ${trip.vtype} — ${trip.vno}\nCrane: ${trip.crane}\n\n📍 Pickup: ${trip.pickup}\n📍 Drop: ${trip.drop}\n\n👤 Customer: ${trip.owner}\n📞 CX: ${trip.ownerPhone}\n\nVendor: ${CU.name}\n\n✅ Portal: ${url}\n_Driver portal mein apna mobile daalo_`;
+  window.open(`https://wa.me/91${dMob}?text=${encodeURIComponent(msg)}`,'_blank');
+  toast(`${dName} ko WhatsApp bheja! ✅`);
+  renderVendorReqs(CU);
+}
+async function vConfirmReject(i, id) {
+  const reason=document.getElementById('vrr-'+i).value.trim()||'No reason';
+  const trip=DB.trips.find(t=>t.id===id);
+  if(trip) trip.status='Rejected';
+  await sheetPost({action:'add_trip',tripId:id,status:'Rejected'});
+  await logAct(CU.name,CU.mobile,'Vendor','Trip rejected',`${id} | ${reason}`);
+  toast('Trip rejected','blue');
+  renderVendorReqs(CU);
+}
+
+// ── DRIVER ────────────────────────────────────────────────
+function loadDriver(user) {
+  showPage('app-driver');
+  document.getElementById('d-uname').textContent = user.name;
+  document.getElementById('d-t0').textContent = new Date().toLocaleString('en-IN');
+  const trip = DB.trips.find(t=>t.driverMobile===user.mobile && t.status!=='Completed' && t.status!=='Rejected');
+  if(!trip){document.getElementById('d-no-trip').style.display='block';document.getElementById('d-trip-wrap').style.display='none';return;}
+  window._trip = trip;
+  document.getElementById('d-trip-info').innerHTML = `
+    <div><div class="ig-label">Trip ID</div><div class="ig-val mono">${trip.id}</div></div>
+    <div><div class="ig-label">Vehicle</div><div class="ig-val">${trip.vtype} — ${trip.vno}</div></div>
+    <div><div class="ig-label">Crane</div><div class="ig-val">${trip.crane}</div></div>
+    <div><div class="ig-label">Condition</div><div class="ig-val">${trip.cond}</div></div>`;
+  document.getElementById('d-cx-num').textContent = trip.ownerPhone;
+  document.getElementById('d-cx-name').textContent = trip.owner;
+  document.getElementById('d-call-btn').onclick = ()=>window.open('tel:'+trip.ownerPhone);
+  document.getElementById('d-pickup-addr').textContent = trip.pickup;
+  document.getElementById('d-drop-addr').textContent = trip.drop;
+  document.getElementById('d-ssub-1').textContent = trip.pickup;
+  document.getElementById('d-ssub-3').textContent = trip.drop;
+}
+function capPhoto(step, idx, label) {
+  const sl=document.getElementById('dp'+step+'-'+idx);
+  if(sl.classList.contains('cap'))return;
+  sl.classList.add('cap');
+  sl.innerHTML=`<svg viewBox="0 0 20 20" fill="none" stroke="var(--green)" stroke-width="2"><path d="M4 10l4 4 8-8"/></svg><span style="font-size:9px;color:var(--green)">${label}</span>`;
+  PC[step]++;
+  if(PC[step]===4) document.getElementById('d-btn-'+step).disabled=false;
+}
+async function dStep(step) {
+  const now=new Date(), t=now.getHours()+':'+String(now.getMinutes()).padStart(2,'0');
+  const sm={1:'At pickup',2:'In transit',3:'Reached drop'}, fm={1:'pickupAt',2:'transitAt',3:'dropAt'};
+  if(window._trip) window._trip.status=sm[step];
+  document.getElementById('d-dot-'+step).className='sdot done';
+  document.getElementById('d-dot-'+step).textContent='✓';
+  document.getElementById('d-btn-'+step).style.display='none';
+  document.getElementById('d-time-'+step).textContent='Today '+t+(step===1||step===3?' — 4 photos saved':'');
+  document.getElementById('d-time-'+step).style.display='block';
+  if(document.getElementById('d-line-'+step)) document.getElementById('d-line-'+step).className='sline done';
+  if(step===1){document.getElementById('d-pnote-1').classList.remove('show');document.getElementById('d-pgrid-1').classList.remove('show');document.getElementById('d-dot-2').className='sdot cur';document.getElementById('d-btn-2').classList.add('show');}
+  if(step===2){document.getElementById('d-dot-3').className='sdot cur';document.getElementById('d-pnote-3').classList.add('show');document.getElementById('d-pgrid-3').classList.add('show');document.getElementById('d-btn-3').classList.add('show');}
+  if(step===3){document.getElementById('d-pnote-3').classList.remove('show');document.getElementById('d-pgrid-3').classList.remove('show');document.getElementById('d-dot-4').className='sdot cur';document.getElementById('d-km-row').classList.add('show');}
+  await sheetPost({action:'add_trip',tripId:window._trip?.id,status:sm[step],[fm[step]]:new Date().toLocaleString()});
+  await logAct(CU.name,CU.mobile,'Driver',sm[step],'Trip: '+(window._trip?.id||''));
+  toast('Status updated ✅');
+}
+async function completeTrip() {
+  const km=document.getElementById('d-km').value;
+  if(!km){toast('KM enter karo!','red');return;}
+  if(window._trip){window._trip.status='Completed';window._trip.km=km;}
+  document.getElementById('d-dot-4').className='sdot done';
+  document.getElementById('d-dot-4').textContent='✓';
+  document.getElementById('d-km-row').style.display='none';
+  document.getElementById('d-done').style.display='block';
+  await sheetPost({action:'add_trip',tripId:window._trip?.id,status:'Completed',km,completedAt:new Date().toLocaleString()});
+  await logAct(CU.name,CU.mobile,'Driver','Trip completed','Trip: '+(window._trip?.id||'')+' | KM: '+km);
+  toast('Trip complete! ✅');
+}
+
+// ── ADMIN ─────────────────────────────────────────────────
+function loadAdmin(user) {
+  showPage('app-admin');
+  document.getElementById('a-uname').textContent = user.name;
+  renderDash();
+  renderAdminVendors();
+  renderAdminGT();
+  renderLog();
+}
+function aSwitch(t, el) {
+  document.querySelectorAll('#app-admin .tab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  ['dash','vendors','ground','log'].forEach(x=>document.getElementById('at-'+x).style.display=x===t?'block':'none');
+}
+function dashFilter(r, el) {
+  document.querySelectorAll('#at-dash .btn').forEach(b=>{b.style.borderColor='';b.style.color='';});
+  el.style.borderColor='var(--blue-b)'; el.style.color='var(--blue)';
+  const now=new Date(), from=new Date();
+  if(r==='today') from.setHours(0,0,0,0);
+  else if(r==='week') from.setDate(now.getDate()-7);
+  else if(r==='month') from.setDate(now.getDate()-30);
+  const trips = r==='all' ? DB.trips : DB.trips.filter(t=>new Date(t.createdAt||now)>=from);
+  updateStats(trips);
+  renderTripsTable(trips);
+}
+function renderDash() { updateStats(DB.trips); renderCityStats(); renderTripsTable(); }
+function updateStats(trips) {
+  document.getElementById('s-total').textContent = trips.length;
+  document.getElementById('s-done').textContent = trips.filter(t=>t.status==='Completed').length;
+  document.getElementById('s-prog').textContent = trips.filter(t=>['Assigned','At pickup','In transit','Reached drop'].includes(t.status)).length;
+  document.getElementById('s-pend').textContent = trips.filter(t=>t.status==='Pending').length;
+}
+function renderCityStats() {
+  const cities=['Delhi','Gurgaon','Noida','Faridabad','Chandigarh'];
+  document.getElementById('city-stats').innerHTML=cities.map(c=>{
+    const total=DB.trips.filter(t=>t.city===c).length;
+    const done=DB.trips.filter(t=>t.city===c&&t.status==='Completed').length;
+    const pct=total?Math.round((done/total)*100):0;
+    return `<div class="city-row">
+      <div class="city-name">${c}</div>
+      <div class="city-bar"><div class="city-fill" style="width:${pct}%"></div></div>
+      <div class="city-pct">${pct}%</div>
+      <div class="city-pills">
+        <span class="cn p-new">T:${total}</span>
+        <span class="cn p-done">D:${done}</span>
+        <span class="cn p-pending">P:${total-done}</span>
+      </div>
+    </div>`;}).join('');
+}
+function renderTripsTable(trips) {
+  const data=trips||DB.trips;
+  document.getElementById('a-trips-body').innerHTML=data.map(t=>`
+    <tr><td class="mono" style="color:var(--blue)">${t.id}</td><td>${t.vtype} ${t.vno}</td><td>${t.owner}</td>
+    <td>${t.city}</td><td>${t.vendorName}</td><td>${t.driver||'—'}</td><td>${t.createdBy||'—'}</td>
+    <td><span class="pill p-${sc(t.status)}">${t.status}</span></td></tr>`).join('');
+}
+function renderAdminVendors() {
+  document.getElementById('a-vendor-list').innerHTML=DB.vendors.length?DB.vendors.map((v,i)=>`
+    <div class="user-item">
+      <div><div class="ui-name">${v.name}</div><div class="ui-sub">${v.mobile1}${v.mobile2?' | '+v.mobile2:''}</div><div class="ui-extra">${v.city} · ${v.crane} · ₹${v.rate||'?'}/trip</div></div>
+      <div class="ui-actions">
+        <button class="btn btn-danger btn-sm" onclick="removeVendor(${i})">Remove</button>
+      </div>
+    </div>`).join(''):'<div class="empty-state">Koi vendor nahi — neeche add karo</div>';
+}
+async function addVendor() {
+  const name=document.getElementById('av-name').value.trim();
+  const city=document.getElementById('av-city').value;
+  const mob1=document.getElementById('av-mob1').value.trim();
+  const mob2=document.getElementById('av-mob2').value.trim();
+  const crane=document.getElementById('av-crane').value;
+  const rate=document.getElementById('av-rate').value.trim();
+  if(!name||!city||mob1.length!==10){toast('Required fields fill karo!','red');return;}
+  if(DB.vendors.find(v=>v.mobile1===mob1)){toast('Ye number already registered hai!','red');return;}
+  DB.vendors.push({name,city,mobile1:mob1,mobile2:mob2,crane,rate,drivers:[]});
+  await saveUsers();
+  await logAct(CU.name,CU.mobile,'Admin','Vendor added',`${name} (${mob1}) — ${city}`);
+  renderAdminVendors();
+  ['av-name','av-mob1','av-mob2','av-rate'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('av-city').value='';
+  toast(name+' vendor add ho gaya! ✅');
+}
+async function removeVendor(i) {
+  if(!confirm('Remove '+DB.vendors[i].name+'?')) return;
+  DB.vendors.splice(i,1);
+  await saveUsers();
+  renderAdminVendors();
+  toast('Vendor removed');
+}
+function renderAdminGT() {
+  document.getElementById('a-gt-list').innerHTML=DB.ground.length?DB.ground.map((u,i)=>`
+    <div class="user-item">
+      <div><div class="ui-name">${u.name}</div><div class="ui-sub">${u.mobile}</div><div class="ui-extra">${u.city||''}</div></div>
+      <button class="btn btn-danger btn-sm" onclick="removeGT(${i})">Remove</button>
+    </div>`).join(''):'<div class="empty-state">Koi member nahi — neeche add karo</div>';
+}
+async function addGT() {
+  const name=document.getElementById('agt-name').value.trim();
+  const mob=document.getElementById('agt-mob').value.trim();
+  const city=document.getElementById('agt-city').value;
+  if(!name||mob.length!==10){toast('Name aur 10-digit mobile daalo!','red');return;}
+  if(DB.ground.find(u=>u.mobile===mob)){toast('Ye number already registered hai!','red');return;}
+  DB.ground.push({name,mobile:mob,city});
+  await saveUsers();
+  await logAct(CU.name,CU.mobile,'Admin','Ground team added',`${name} (${mob}) — ${city}`);
+  renderAdminGT();
+  document.getElementById('agt-name').value='';document.getElementById('agt-mob').value='';document.getElementById('agt-city').value='';
+  toast(name+' add ho gaya! ✅');
+}
+async function removeGT(i) {
+  if(!confirm('Remove '+DB.ground[i].name+'?')) return;
+  DB.ground.splice(i,1);
+  await saveUsers();
+  renderAdminGT();
+  toast('Member removed');
+}
+function renderLog() {
+  document.getElementById('a-log-body').innerHTML=DB.logs.map(l=>`
+    <tr><td class="mono" style="font-size:10px">${l.time}</td><td>${l.name}</td><td class="mono">${l.mobile}</td>
+    <td><span class="pill p-${l.role==='Admin'?'done':l.role==='Vendor'?'assigned':l.role==='Driver'?'pickup':'new'}">${l.role}</span></td>
+    <td>${l.action}</td><td style="color:var(--text2)">${l.details}</td></tr>`).join('');
+}
+
+// ── UTILS ─────────────────────────────────────────────────
+function sc(s){
+  if(s==='Completed') return 'done';
+  if(s==='In transit') return 'transit';
+  if(s==='At pickup'||s==='Reached drop') return 'pickup';
+  if(s==='Assigned') return 'assigned';
+  if(s==='Rejected') return 'rejected';
+  return 'pending';
+}
+function downloadCSV() {
+  const h=['Trip ID','Vehicle','Type','Owner','Phone','City','Vendor','Driver','Driver Mobile','Pickup','Drop','KM','Status','Created By'];
+  const rows=DB.trips.map(t=>[t.id,t.vno,t.vtype,t.owner,t.ownerPhone,t.city,t.vendorName,t.driver,t.driverMobile,t.pickup,t.drop,t.km,t.status,t.createdBy]);
+  const csv=[h,...rows].map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='towtrack_'+new Date().toISOString().slice(0,10)+'.csv';
+  a.click();
+}
+
+// ── INIT ──────────────────────────────────────────────────
+(async function init() {
+  // Load from Sheet
+  const data = await sheetGet();
+  if(data?.success) {
+    if(data.admins?.length) DB.admin = data.admins;
+    if(data.ground?.length) DB.ground = data.ground;
+    if(data.vendors?.length) DB.vendors = data.vendors;
+    if(data.trips?.length) DB.trips = data.trips;
+  }
+  // Hide loading
+  document.getElementById('loading').style.display = 'none';
+  // Restore session
+  const sess = getSession();
+  if(sess) {
+    CU = sess.user; CR = sess.role;
+    loadPortal(CR, CU);
+  }
+  // URL params (WhatsApp links)
+  const p = new URLSearchParams(window.location.search);
+  if(p.get('role') && p.get('phone') && !sess) {
+    CR = p.get('role');
+    goLogin(CR);
+    document.getElementById('l-mob').value = p.get('phone');
+  }
+})();
+</script>
+</body>
+</html>
